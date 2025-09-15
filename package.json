@@ -1,6 +1,6 @@
 {
   "name": "brainmap.js",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A beautiful, interactive, and themeable mindmap library for creating hierarchical visualizations with editing capabilities",
   "main": "mindmap.js",
   "scripts": {
