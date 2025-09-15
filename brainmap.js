@@ -1,6 +1,6 @@
 /**
  * Brainmap.js - Interactive Mindmap Library
- * Version 1.0.3
+ * Version 1.0.6
  * 
  * A beautiful, themeable, and interactive mindmap library for creating
  * hierarchical visualizations with editing capabilities.
@@ -94,6 +94,9 @@ class MindMap {
     // Add theme class
     this.container.className = `mindmap-container ${this.config.theme}`;
 
+    // Apply custom colors if provided
+    this.applyCustomColors();
+
     // Create controls
     if (this.config.showControls) {
       this.controlsEl = document.createElement('div');
@@ -109,10 +112,10 @@ class MindMap {
     if (this.config.showStatus) {
       this.statusEl = document.createElement('div');
       this.statusEl.className = 'mindmap-status';
-      
+
       // Detect if device supports touch
       const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      
+
       if (this.config.editable) {
         this.statusEl.textContent = isTouchDevice ?
           'Long press nodes for menu • Double tap to rename' :
@@ -120,7 +123,7 @@ class MindMap {
       } else {
         this.statusEl.textContent = 'Interactive Mind Map';
       }
-      
+
       this.container.appendChild(this.statusEl);
     }
 
@@ -134,17 +137,17 @@ class MindMap {
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     defs.innerHTML = `
       <linearGradient id="mindmapRootGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
-        <stop offset="100%" style="stop-color:#dc2626;stop-opacity:1" />
+        <stop offset="0%" style="stop-color:${this.config.colors.root.fill};stop-opacity:1" />
+        <stop offset="100%" style="stop-color:${this.config.colors.root.stroke};stop-opacity:1" />
       </linearGradient>
       <linearGradient id="mindmapBranchGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:#34d399;stop-opacity:1" />
-        <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+        <stop offset="0%" style="stop-color:${this.config.colors.branch.fill};stop-opacity:1" />
+        <stop offset="100%" style="stop-color:${this.config.colors.branch.stroke};stop-opacity:1" />
       </linearGradient>
       <linearGradient id="mindmapLeafGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
-        <stop offset="50%" style="stop-color:#3b82f6;stop-opacity:1" />
-        <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+        <stop offset="0%" style="stop-color:${this.config.colors.leaf.fill};stop-opacity:1" />
+        <stop offset="50%" style="stop-color:${this.config.colors.leaf.fill};stop-opacity:0.8" />
+        <stop offset="100%" style="stop-color:${this.config.colors.leaf.stroke};stop-opacity:1" />
       </linearGradient>
     `;
     this.svg.appendChild(defs);
@@ -154,6 +157,36 @@ class MindMap {
     this.svg.appendChild(this.viewport);
 
     this.container.appendChild(this.svg);
+  }
+
+  /**
+   * Apply custom colors to CSS variables
+   */
+  applyCustomColors() {
+    const root = this.container;
+    
+    // Apply custom colors to CSS variables
+    if (this.config.colors.root) {
+      if (this.config.colors.root.fill) root.style.setProperty('--mindmap-color-root-fill', this.config.colors.root.fill);
+      if (this.config.colors.root.stroke) root.style.setProperty('--mindmap-color-root-stroke', this.config.colors.root.stroke);
+      if (this.config.colors.root.text) root.style.setProperty('--mindmap-color-root-text', this.config.colors.root.text);
+    }
+    
+    if (this.config.colors.branch) {
+      if (this.config.colors.branch.fill) root.style.setProperty('--mindmap-color-branch-fill', this.config.colors.branch.fill);
+      if (this.config.colors.branch.stroke) root.style.setProperty('--mindmap-color-branch-stroke', this.config.colors.branch.stroke);
+      if (this.config.colors.branch.text) root.style.setProperty('--mindmap-color-branch-text', this.config.colors.branch.text);
+    }
+    
+    if (this.config.colors.leaf) {
+      if (this.config.colors.leaf.fill) root.style.setProperty('--mindmap-color-leaf-fill', this.config.colors.leaf.fill);
+      if (this.config.colors.leaf.stroke) root.style.setProperty('--mindmap-color-leaf-stroke', this.config.colors.leaf.stroke);
+      if (this.config.colors.leaf.text) root.style.setProperty('--mindmap-color-leaf-text', this.config.colors.leaf.text);
+    }
+    
+    if (this.config.colors.link) {
+      root.style.setProperty('--mindmap-color-link', this.config.colors.link);
+    }
   }
 
   /**
@@ -193,7 +226,7 @@ class MindMap {
       this.svg.addEventListener('mousemove', this.boundHandlers.mousemove);
       this.svg.addEventListener('mouseup', this.boundHandlers.mouseup);
       this.svg.addEventListener('mouseleave', this.boundHandlers.mouseleave);
-      
+
       // Touch events
       this.svg.addEventListener('touchstart', this.boundHandlers.touchstart, { passive: false });
       this.svg.addEventListener('touchmove', this.boundHandlers.touchmove, { passive: false });
@@ -214,7 +247,7 @@ class MindMap {
       this.svg.removeEventListener('mousemove', this.boundHandlers.mousemove);
       this.svg.removeEventListener('mouseup', this.boundHandlers.mouseup);
       this.svg.removeEventListener('mouseleave', this.boundHandlers.mouseleave);
-      
+
       // Remove touch events
       this.svg.removeEventListener('touchstart', this.boundHandlers.touchstart);
       this.svg.removeEventListener('touchmove', this.boundHandlers.touchmove);
@@ -259,7 +292,7 @@ class MindMap {
       if (this.statusEl) {
         // Detect if device supports touch
         const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        
+
         if (this.config.editable) {
           this.statusEl.textContent = isTouchDevice ?
             'Long press nodes for menu • Double tap to rename' :
@@ -366,19 +399,19 @@ class MindMap {
    */
   handleTouchStart(e) {
     if (this.isEditing) return;
-    
+
     // Check if touch started on a node - if so, let node handle it
     const target = e.target;
     const nodeElement = target.closest('.mindmap-node');
     if (nodeElement) {
       return; // Let node handle the touch
     }
-    
+
     e.preventDefault();
-    
+
     const touches = e.touches;
     this.isTouching = true;
-    
+
     if (touches.length === 1) {
       // Single touch - panning
       this.isDragging = true;
@@ -393,7 +426,7 @@ class MindMap {
       this.isDragging = false;
       this.lastTouchDistance = this.getTouchDistance(touches);
       this.lastTouchCenter = this.getTouchCenter(touches);
-      
+
       // Convert touch center to SVG coordinates
       const svgCenter = this.screenToSvg(this.lastTouchCenter.x, this.lastTouchCenter.y);
       this.touchStart = {
@@ -413,18 +446,18 @@ class MindMap {
    */
   handleTouchMove(e) {
     if (!this.isTouching || this.isEditing) return;
-    
+
     // Check if touch is on a node - if so, don't interfere
     const target = e.target;
     const nodeElement = target.closest('.mindmap-node');
     if (nodeElement) {
       return; // Let node handle the touch
     }
-    
+
     e.preventDefault();
-    
+
     const touches = e.touches;
-    
+
     if (touches.length === 1 && this.isDragging && this.touchStart) {
       // Single touch panning
       this.offsetX = this.touchStart.ox + (touches[0].clientX - this.touchStart.x);
@@ -434,26 +467,26 @@ class MindMap {
       // Two touch pinch-to-zoom
       const currentDistance = this.getTouchDistance(touches);
       const currentCenter = this.getTouchCenter(touches);
-      
+
       // Calculate zoom
       const scaleFactor = currentDistance / this.lastTouchDistance;
       const newZoom = Math.max(0.1, Math.min(5, this.touchStart.zoom * scaleFactor));
-      
+
       // Calculate new offset to zoom around touch center
       const fixedX = (this.touchStart.svgX - this.touchStart.ox) / this.touchStart.zoom;
       const fixedY = (this.touchStart.svgY - this.touchStart.oy) / this.touchStart.zoom;
-      
+
       // Update zoom and position
       this.zoom = newZoom;
-      
+
       // Adjust for center movement
       const centerDx = currentCenter.x - this.lastTouchCenter.x;
       const centerDy = currentCenter.y - this.lastTouchCenter.y;
-      
+
       const svgCenter = this.screenToSvg(currentCenter.x, currentCenter.y);
       this.offsetX = svgCenter.x - fixedX * this.zoom + centerDx;
       this.offsetY = svgCenter.y - fixedY * this.zoom + centerDy;
-      
+
       this.updateTransform();
     }
   }
@@ -463,18 +496,18 @@ class MindMap {
    */
   handleTouchEnd(e) {
     if (!this.isTouching) return;
-    
+
     // Check if touch is on a node - if so, don't interfere
     const target = e.target;
     const nodeElement = target.closest('.mindmap-node');
     if (nodeElement) {
       return; // Let node handle the touch
     }
-    
+
     e.preventDefault();
-    
+
     const touches = e.touches;
-    
+
     if (touches.length === 0) {
       // All touches ended
       this.isTouching = false;
@@ -629,8 +662,8 @@ class MindMap {
 
     const items = [
       { text: `Rename "${node.name}"`, action: () => this.startEdit(nodeId) },
-      { 
-        text: 'Add Child', 
+      {
+        text: 'Add Child',
         action: async () => {
           try {
             const name = await this.showInputModal('Add Child Node', 'Enter node name', 'New Node');
@@ -640,8 +673,8 @@ class MindMap {
           }
         }
       },
-      !isRoot && { 
-        text: 'Add Sibling', 
+      !isRoot && {
+        text: 'Add Sibling',
         action: async () => {
           try {
             const name = await this.showInputModal('Add Sibling Node', 'Enter node name', 'New Node');
@@ -750,7 +783,7 @@ class MindMap {
       // Event listeners
       confirmBtn.addEventListener('click', confirm);
       cancelBtn.addEventListener('click', cancel);
-      
+
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -1027,7 +1060,7 @@ class MindMap {
               Math.pow(currentPos.x - touchStartPos.x, 2) +
               Math.pow(currentPos.y - touchStartPos.y, 2)
             );
-            
+
             if (distance > 15) { // 15px tolerance
               clearTimeout(longPressTimeout);
               g.classList.remove('long-pressing');
@@ -1065,7 +1098,7 @@ class MindMap {
           // Quick tap for double-tap detection
           if (touchDuration < 400 && distance < 15) {
             tapCount++;
-            
+
             if (tapCount === 1) {
               // Start timer for double tap
               tapTimeout = setTimeout(() => {

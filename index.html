@@ -90,6 +90,7 @@
         <button class="demo-btn" onclick="loadLearningData()">📚 Load Learning Data</button>
         <button class="demo-btn" onclick="toggleEditing()">✏️ Toggle Editing</button>
         <button class="demo-btn" onclick="addRandomNode()">➕ Add Random Node</button>
+        <button class="demo-btn" onclick="testCustomColors()">🎨 Test Custom Colors</button>
     </div>
 
     <script src="brainmap-config.js?v=2"></script>
@@ -271,6 +272,26 @@
             }, 10000);
             */
         });
+
+        // Test custom colors
+        function testCustomColors() {
+            // Create a new mindmap with custom colors
+            mindmap = new MindMap(document.getElementById('mindmap-container'), {
+                theme: 'default',
+                colors: {
+                    root: { fill: '#ff6b6b', stroke: '#e55656', text: '#ffffff' },
+                    branch: { fill: '#4ecdc4', stroke: '#44b2aa', text: '#1a5b56' },
+                    leaf: { fill: '#ffe66d', stroke: '#f5d547', text: '#8b6914' },
+                    link: 'rgba(255,107,107,0.5)'
+                },
+                editable: isEditable,
+                showControls: true,
+                showStatus: true
+            });
+
+            // Set the data
+            mindmap.setData(sampleDatasets.simple);
+        }
 
         // Demonstrate programmatic API usage
         function demonstrateAPI() {
