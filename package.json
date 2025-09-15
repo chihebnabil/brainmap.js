@@ -1,0 +1,56 @@
+{
+  "name": "brainmap.js",
+  "version": "1.0.0",
+  "description": "A beautiful, interactive, and themeable mindmap library for creating hierarchical visualizations with editing capabilities",
+  "main": "mindmap.js",
+  "files": [
+    "mindmap.js",
+    "mindmap.css",
+    "mindmap-config.js",
+    "demo.html",
+    "README.md"
+  ],
+  "scripts": {
+    "demo": "npx http-server . -p 8080 -o index.html",
+    "test": "echo \"No tests specified\" && exit 0",
+    "build": "echo \"No build process needed - vanilla JS library\" && exit 0"
+  },
+  "keywords": [
+    "mindmap",
+    "visualization",
+    "interactive",
+    "svg",
+    "tree",
+    "hierarchy",
+    "diagram",
+    "radial",
+    "mind-mapping",
+    "brainstorming",
+    "knowledge-map",
+    "browser",
+    "vanilla-js",
+    "no-dependencies"
+  ],
+  "author": "Chiheb Nabil",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chihebnabil/brainmap.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chihebnabil/brainmap.js/issues"
+  },
+  "homepage": "https://github.com/chihebnabil/brainmap.js#readme",
+  "devDependencies": {},
+  "dependencies": {},
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "> 1%",
+    "not ie <= 11"
+  ],
+  "jsdelivr": "brainmap.js",
+  "unpkg": "brainmap.js"
+}

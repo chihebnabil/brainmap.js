@@ -1,0 +1,242 @@
+/**
+ * MindMap.js - CSS Styles
+ * A beautiful, interactive mindmap library
+ */
+
+:root {
+  /* Theme Variables */
+  --mindmap-bg-primary: #9696c2;
+  --mindmap-bg-secondary: #ffffff;
+
+  --mindmap-color-root: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+  --mindmap-color-root-stroke: #dc2626;
+  --mindmap-color-root-text: #ffffff;
+
+  --mindmap-color-branch: linear-gradient(135deg, #34d399 0%, #059669 100%);
+  --mindmap-color-branch-stroke: #059669;
+  --mindmap-color-branch-text: #065f46;
+
+  --mindmap-color-leaf: linear-gradient(135deg, #60a5fa 0%, #1d4ed8 100%);
+  --mindmap-color-leaf-stroke: #2563eb;
+  --mindmap-color-leaf-text: #1e40af;
+
+  --mindmap-color-link: rgba(255, 255, 255, 0.6);
+  --mindmap-color-text: #333333;
+  --mindmap-color-hover-shadow: rgba(0, 0, 0, 0.3);
+
+  --mindmap-radius-root: 12px;
+  --mindmap-radius-branch: 7px;
+  --mindmap-radius-leaf: 8px;
+  --mindmap-stroke-width: 2;
+
+  --mindmap-font-size-root: 14px;
+  --mindmap-font-size-branch: 12px;
+  --mindmap-font-size-leaf: 11px;
+  --mindmap-font-weight-normal: 600;
+  --mindmap-font-weight-bold: 700;
+
+  --mindmap-transition: all 0.2s ease;
+  --mindmap-shadow-hover: 0 6px 12px rgba(37, 99, 235, 0.4);
+  --mindmap-shadow-default: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.mindmap-container {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu,
+    "Helvetica Neue", Arial, sans-serif;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--mindmap-bg-primary);
+  overflow: hidden;
+}
+
+.mindmap-svg {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.mindmap-svg.editing {
+  cursor: default;
+}
+
+.mindmap-node circle {
+  stroke-width: var(--mindmap-stroke-width);
+  transition: var(--mindmap-transition);
+  filter: drop-shadow(var(--mindmap-shadow-default));
+}
+
+.mindmap-node.root circle {
+  fill: url(#mindmapRootGradient);
+  stroke: var(--mindmap-color-root-stroke);
+  stroke-width: 3;
+}
+
+.mindmap-node.branch circle {
+  fill: url(#mindmapBranchGradient);
+  stroke: var(--mindmap-color-branch-stroke);
+}
+
+.mindmap-node.leaf circle {
+  fill: url(#mindmapLeafGradient);
+  stroke: var(--mindmap-color-leaf-stroke);
+}
+
+.mindmap-node:hover circle {
+  transform: scale(1.2);
+  filter: drop-shadow(var(--mindmap-shadow-hover));
+}
+
+.mindmap-node.editing circle {
+  stroke-width: 3;
+  stroke-dasharray: 5, 5;
+  animation: mindmap-dash 1s linear infinite;
+}
+
+@keyframes mindmap-dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+.mindmap-node text {
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+  fill: var(--mindmap-color-text);
+  font-weight: var(--mindmap-font-weight-normal);
+  transition: var(--mindmap-transition);
+}
+
+.mindmap-node.root text {
+  font-size: var(--mindmap-font-size-root);
+  fill: var(--mindmap-color-root-text);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  font-weight: var(--mindmap-font-weight-bold);
+}
+
+.mindmap-node.branch text {
+  font-size: var(--mindmap-font-size-branch);
+  fill: var(--mindmap-color-branch-text);
+}
+
+.mindmap-node.leaf text {
+  font-size: var(--mindmap-font-size-leaf);
+  fill: var(--mindmap-color-leaf-text);
+  font-weight: var(--mindmap-font-weight-bold);
+}
+
+.mindmap-link {
+  stroke: var(--mindmap-color-link);
+  stroke-width: 2;
+  fill: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Editing Input */
+.mindmap-edit-input {
+  position: absolute;
+  padding: 4px 8px;
+  border: 2px solid var(--mindmap-color-leaf-stroke);
+  border-radius: 4px;
+  background: var(--mindmap-bg-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: var(--mindmap-font-weight-normal);
+  text-align: center;
+  z-index: 1000;
+  box-shadow: var(--mindmap-shadow-hover);
+}
+
+/* Context Menu */
+.mindmap-context-menu {
+  position: absolute;
+  background: var(--mindmap-bg-secondary);
+  border-radius: 8px;
+  box-shadow: var(--mindmap-shadow-hover);
+  z-index: 1001;
+  min-width: 180px;
+  border: 1px solid #e5e7eb;
+}
+
+.mindmap-context-menu-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: var(--mindmap-transition);
+  font-size: 14px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.mindmap-context-menu-item:last-child {
+  border-bottom: none;
+}
+
+.mindmap-context-menu-item:hover {
+  background: #f9fafb;
+  color: var(--mindmap-color-leaf-stroke);
+}
+
+.mindmap-context-menu-item.dangerous {
+  color: #dc2626;
+}
+
+.mindmap-context-menu-item.dangerous:hover {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Controls */
+.mindmap-controls {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: 999;
+}
+
+.mindmap-control-btn {
+  padding: 8px 12px;
+  background: var(--mindmap-bg-secondary);
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: var(--mindmap-transition);
+  box-shadow: var(--mindmap-shadow-default);
+}
+
+.mindmap-control-btn:hover {
+  background: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+.mindmap-status {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--mindmap-color-text);
+  box-shadow: var(--mindmap-shadow-default);
+}
+
+/* Dark theme variant */
+.mindmap-container.dark {
+  --mindmap-bg-primary: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  --mindmap-bg-secondary: #374151;
+  --mindmap-color-text: #f9fafb;
+  --mindmap-color-link: rgba(156, 163, 175, 0.6);
+}
+
+/* Compact theme variant */
+.mindmap-container.compact {
+  --mindmap-radius-root: 8px;
+  --mindmap-radius-branch: 5px;
+  --mindmap-radius-leaf: 6px;
+  --mindmap-font-size-root: 12px;
+  --mindmap-font-size-branch: 10px;
+  --mindmap-font-size-leaf: 9px;
+}
