@@ -363,7 +363,7 @@ brainmap-js-library/
 ### Local Development
 
 1. Clone the repository
-2. Open `demo.html` in your browser
+2. Open `index.html` in your browser
 3. Modify the library files as needed
 4. Test changes in the demo
 

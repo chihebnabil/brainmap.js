@@ -629,8 +629,28 @@ class MindMap {
 
     const items = [
       { text: `Rename "${node.name}"`, action: () => this.startEdit(nodeId) },
-      { text: 'Add Child', action: () => this.addChild(nodeId, prompt('Child name:')) },
-      !isRoot && { text: 'Add Sibling', action: () => this.addSibling(nodeId, prompt('Sibling name:')) },
+      { 
+        text: 'Add Child', 
+        action: async () => {
+          try {
+            const name = await this.showInputModal('Add Child Node', 'Enter node name', 'New Node');
+            this.addChild(nodeId, name);
+          } catch (e) {
+            // User cancelled
+          }
+        }
+      },
+      !isRoot && { 
+        text: 'Add Sibling', 
+        action: async () => {
+          try {
+            const name = await this.showInputModal('Add Sibling Node', 'Enter node name', 'New Node');
+            this.addSibling(nodeId, name);
+          } catch (e) {
+            // User cancelled
+          }
+        }
+      },
       !isRoot && { text: `Delete "${node.name}"`, action: () => this.deleteNode(nodeId), dangerous: true }
     ].filter(Boolean);
 
@@ -638,9 +658,9 @@ class MindMap {
       const div = document.createElement('div');
       div.className = `mindmap-context-menu-item ${item.dangerous ? 'dangerous' : ''}`;
       div.textContent = item.text;
-      div.addEventListener('click', () => {
-        item.action();
+      div.addEventListener('click', async () => {
         this.hideContextMenu();
+        await item.action();
       });
       this.contextMenu.appendChild(div);
     });
@@ -665,6 +685,89 @@ class MindMap {
       this.contextMenu.remove();
       this.contextMenu = null;
     }
+  }
+
+  /**
+   * Show custom input modal
+   */
+  showInputModal(title, placeholder = '', defaultValue = '') {
+    return new Promise((resolve, reject) => {
+      // Create modal overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'mindmap-modal-overlay';
+
+      // Create modal
+      const modal = document.createElement('div');
+      modal.className = 'mindmap-modal';
+
+      // Create modal content
+      modal.innerHTML = `
+        <h3 class="mindmap-modal-title">${title}</h3>
+        <input type="text" class="mindmap-modal-input" placeholder="${placeholder}" value="${defaultValue}">
+        <div class="mindmap-modal-buttons">
+          <button class="mindmap-modal-btn secondary" data-action="cancel">Cancel</button>
+          <button class="mindmap-modal-btn primary" data-action="confirm">Add</button>
+        </div>
+      `;
+
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      const input = modal.querySelector('.mindmap-modal-input');
+      const cancelBtn = modal.querySelector('[data-action="cancel"]');
+      const confirmBtn = modal.querySelector('[data-action="confirm"]');
+
+      // Focus and select input
+      setTimeout(() => {
+        input.focus();
+        input.select();
+      }, 100);
+
+      // Handle actions
+      const cleanup = () => {
+        overlay.remove();
+      };
+
+      const confirm = () => {
+        const value = input.value.trim();
+        if (value) {
+          cleanup();
+          resolve(value);
+        } else {
+          input.focus();
+          input.style.borderColor = '#ef4444';
+          setTimeout(() => {
+            input.style.borderColor = '';
+          }, 1000);
+        }
+      };
+
+      const cancel = () => {
+        cleanup();
+        reject(new Error('Cancelled'));
+      };
+
+      // Event listeners
+      confirmBtn.addEventListener('click', confirm);
+      cancelBtn.addEventListener('click', cancel);
+      
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          confirm();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          cancel();
+        }
+      });
+
+      // Click outside to cancel
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          cancel();
+        }
+      });
+    });
   }
 
   /**
