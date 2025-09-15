@@ -56,8 +56,8 @@ A beautiful, interactive, and themeable mindmap library for creating hierarchica
 ### 2. Via CDN
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/brainmap.js@1.0.0/mindmap.css">
-<script src="https://cdn.jsdelivr.net/npm/brainmap.js@1.0.0/mindmap.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/brainmap.js/brainmap.css">
+<script src="https://cdn.jsdelivr.net/npm/brainmap.js/brainmap.js"></script>
 ```
 
 ### 3. Via NPM
@@ -302,13 +302,13 @@ const mindmap = new MindMap('#styled-mindmap', {
 ### File Structure
 
 ```
-mindmap-js-library/
-├── mindmap.js          # Main library file
-├── mindmap.css         # Styling and themes
-├── mindmap-config.js   # Configuration options and themes
-├── demo.html           # Interactive demo
-├── package.json        # NPM package configuration
-└── README.md          # This documentation
+brainmap-js-library/
+├── brainmap.js          # Main library file
+├── brainmap.css         # Styling and themes
+├── brainmap-config.js   # Configuration options and themes
+├── index.html           # Interactive demo
+├── package.json         # NPM package configuration
+└── README.md           # This documentation
 ```
 
 ### Local Development

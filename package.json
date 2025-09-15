@@ -1,15 +1,8 @@
 {
   "name": "brainmap.js",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "A beautiful, interactive, and themeable mindmap library for creating hierarchical visualizations with editing capabilities",
   "main": "mindmap.js",
-  "files": [
-    "mindmap.js",
-    "mindmap.css",
-    "mindmap-config.js",
-    "demo.html",
-    "README.md"
-  ],
   "scripts": {
     "demo": "npx http-server . -p 8080 -o index.html",
     "test": "echo \"No tests specified\" && exit 0",

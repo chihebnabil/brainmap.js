@@ -1,11 +1,11 @@
 /**
- * MindMap.js - Interactive Mindmap Library
- * Version 1.0.0
+ * Brainmap.js - Interactive Mindmap Library
+ * Version 1.0.3
  * 
  * A beautiful, themeable, and interactive mindmap library for creating
  * hierarchical visualizations with editing capabilities.
  * 
- * @author GitHub Copilot
+ * @author Chiheb Nabil
  * @license MIT
  */
 
