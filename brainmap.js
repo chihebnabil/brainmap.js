@@ -12,7 +12,7 @@
 class MindMap {
   constructor(container, options = {}) {
     this.container = typeof container === 'string' ? document.querySelector(container) : container;
-    
+
     if (!this.container) {
       throw new Error('MindMap: Container element not found');
     }
@@ -48,6 +48,12 @@ class MindMap {
     this.contextMenu = null;
     this.nodeIdCounter = Date.now();
 
+    // Touch state
+    this.isTouching = false;
+    this.touchStart = null;
+    this.lastTouchDistance = null;
+    this.lastTouchCenter = null;
+
     // DOM elements
     this.svg = null;
     this.viewport = null;
@@ -63,7 +69,7 @@ class MindMap {
   init() {
     this.setupDOM();
     this.setupEventListeners();
-    
+
     // Add default data if none provided
     if (!this.treeData) {
       this.setData({
@@ -84,10 +90,10 @@ class MindMap {
   setupDOM() {
     // Clear container
     this.container.innerHTML = '';
-    
+
     // Add theme class
     this.container.className = `mindmap-container ${this.config.theme}`;
-    
+
     // Create controls
     if (this.config.showControls) {
       this.controlsEl = document.createElement('div');
@@ -103,9 +109,18 @@ class MindMap {
     if (this.config.showStatus) {
       this.statusEl = document.createElement('div');
       this.statusEl.className = 'mindmap-status';
-      this.statusEl.textContent = this.config.editable ? 
-        'Right-click nodes to edit • Double-click to rename' : 
-        'Interactive Mind Map';
+      
+      // Detect if device supports touch
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      
+      if (this.config.editable) {
+        this.statusEl.textContent = isTouchDevice ?
+          'Long press nodes for menu • Double tap to rename' :
+          'Right-click nodes to edit • Double-click to rename';
+      } else {
+        this.statusEl.textContent = 'Interactive Mind Map';
+      }
+      
       this.container.appendChild(this.statusEl);
     }
 
@@ -147,7 +162,7 @@ class MindMap {
   setupEventListeners() {
     // Remove existing event listeners if they exist
     this.removeEventListeners();
-    
+
     // Store bound event handlers for cleanup
     this.boundHandlers = {
       wheel: (e) => this.handleWheel(e),
@@ -155,6 +170,9 @@ class MindMap {
       mousemove: (e) => this.handleMouseMove(e),
       mouseup: (e) => this.handleMouseUp(e),
       mouseleave: (e) => this.handleMouseLeave(e),
+      touchstart: (e) => this.handleTouchStart(e),
+      touchmove: (e) => this.handleTouchMove(e),
+      touchend: (e) => this.handleTouchEnd(e),
       hideContextMenu: () => this.hideContextMenu()
     };
 
@@ -175,6 +193,11 @@ class MindMap {
       this.svg.addEventListener('mousemove', this.boundHandlers.mousemove);
       this.svg.addEventListener('mouseup', this.boundHandlers.mouseup);
       this.svg.addEventListener('mouseleave', this.boundHandlers.mouseleave);
+      
+      // Touch events
+      this.svg.addEventListener('touchstart', this.boundHandlers.touchstart, { passive: false });
+      this.svg.addEventListener('touchmove', this.boundHandlers.touchmove, { passive: false });
+      this.svg.addEventListener('touchend', this.boundHandlers.touchend, { passive: false });
     }
 
     // Global click to hide context menu
@@ -191,8 +214,13 @@ class MindMap {
       this.svg.removeEventListener('mousemove', this.boundHandlers.mousemove);
       this.svg.removeEventListener('mouseup', this.boundHandlers.mouseup);
       this.svg.removeEventListener('mouseleave', this.boundHandlers.mouseleave);
+      
+      // Remove touch events
+      this.svg.removeEventListener('touchstart', this.boundHandlers.touchstart);
+      this.svg.removeEventListener('touchmove', this.boundHandlers.touchmove);
+      this.svg.removeEventListener('touchend', this.boundHandlers.touchend);
     }
-    
+
     if (this.boundHandlers) {
       document.removeEventListener('click', this.boundHandlers.hideContextMenu);
     }
@@ -229,9 +257,16 @@ class MindMap {
     this.statusEl.textContent = message;
     setTimeout(() => {
       if (this.statusEl) {
-        this.statusEl.textContent = this.config.editable ? 
-          'Right-click nodes to edit • Double-click to rename' : 
-          'Interactive Mind Map';
+        // Detect if device supports touch
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
+        if (this.config.editable) {
+          this.statusEl.textContent = isTouchDevice ?
+            'Long press nodes for menu • Double tap to rename' :
+            'Right-click nodes to edit • Double-click to rename';
+        } else {
+          this.statusEl.textContent = 'Interactive Mind Map';
+        }
       }
     }, 3000);
   }
@@ -252,22 +287,22 @@ class MindMap {
   handleWheel(e) {
     if (this.isEditing) return;
     e.preventDefault();
-    
+
     const scaleFactor = e.deltaY > 0 ? 0.9 : 1.1;
     const newZoom = this.zoom * scaleFactor;
-    
+
     const centerPoint = this.screenToSvg(
       this.svg.getBoundingClientRect().left + this.svg.getBoundingClientRect().width / 2,
       this.svg.getBoundingClientRect().top + this.svg.getBoundingClientRect().height / 2
     );
-    
+
     const fixedX = (centerPoint.x - this.offsetX) / this.zoom;
     const fixedY = (centerPoint.y - this.offsetY) / this.zoom;
-    
+
     this.zoom = newZoom;
     this.offsetX = centerPoint.x - fixedX * this.zoom;
     this.offsetY = centerPoint.y - fixedY * this.zoom;
-    
+
     this.updateTransform();
   }
 
@@ -277,7 +312,7 @@ class MindMap {
   handleMouseDown(e) {
     if (this.isEditing) return;
     this.isDragging = true;
-    this.dragStart = {x: e.clientX, y: e.clientY, ox: this.offsetX, oy: this.offsetY};
+    this.dragStart = { x: e.clientX, y: e.clientY, ox: this.offsetX, oy: this.offsetY };
     this.svg.style.cursor = 'grabbing';
   }
 
@@ -305,6 +340,160 @@ class MindMap {
   handleMouseLeave() {
     this.isDragging = false;
     this.svg.style.cursor = this.isEditing ? 'default' : 'grab';
+  }
+
+  /**
+   * Get touch distance for pinch-to-zoom
+   */
+  getTouchDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  /**
+   * Get touch center point
+   */
+  getTouchCenter(touches) {
+    return {
+      x: (touches[0].clientX + touches[1].clientX) / 2,
+      y: (touches[0].clientY + touches[1].clientY) / 2
+    };
+  }
+
+  /**
+   * Handle touch start
+   */
+  handleTouchStart(e) {
+    if (this.isEditing) return;
+    
+    // Check if touch started on a node - if so, let node handle it
+    const target = e.target;
+    const nodeElement = target.closest('.mindmap-node');
+    if (nodeElement) {
+      return; // Let node handle the touch
+    }
+    
+    e.preventDefault();
+    
+    const touches = e.touches;
+    this.isTouching = true;
+    
+    if (touches.length === 1) {
+      // Single touch - panning
+      this.isDragging = true;
+      this.touchStart = {
+        x: touches[0].clientX,
+        y: touches[0].clientY,
+        ox: this.offsetX,
+        oy: this.offsetY
+      };
+    } else if (touches.length === 2) {
+      // Two touches - pinch to zoom
+      this.isDragging = false;
+      this.lastTouchDistance = this.getTouchDistance(touches);
+      this.lastTouchCenter = this.getTouchCenter(touches);
+      
+      // Convert touch center to SVG coordinates
+      const svgCenter = this.screenToSvg(this.lastTouchCenter.x, this.lastTouchCenter.y);
+      this.touchStart = {
+        x: this.lastTouchCenter.x,
+        y: this.lastTouchCenter.y,
+        ox: this.offsetX,
+        oy: this.offsetY,
+        zoom: this.zoom,
+        svgX: svgCenter.x,
+        svgY: svgCenter.y
+      };
+    }
+  }
+
+  /**
+   * Handle touch move
+   */
+  handleTouchMove(e) {
+    if (!this.isTouching || this.isEditing) return;
+    
+    // Check if touch is on a node - if so, don't interfere
+    const target = e.target;
+    const nodeElement = target.closest('.mindmap-node');
+    if (nodeElement) {
+      return; // Let node handle the touch
+    }
+    
+    e.preventDefault();
+    
+    const touches = e.touches;
+    
+    if (touches.length === 1 && this.isDragging && this.touchStart) {
+      // Single touch panning
+      this.offsetX = this.touchStart.ox + (touches[0].clientX - this.touchStart.x);
+      this.offsetY = this.touchStart.oy + (touches[0].clientY - this.touchStart.y);
+      this.updateTransform();
+    } else if (touches.length === 2 && this.lastTouchDistance && this.touchStart) {
+      // Two touch pinch-to-zoom
+      const currentDistance = this.getTouchDistance(touches);
+      const currentCenter = this.getTouchCenter(touches);
+      
+      // Calculate zoom
+      const scaleFactor = currentDistance / this.lastTouchDistance;
+      const newZoom = Math.max(0.1, Math.min(5, this.touchStart.zoom * scaleFactor));
+      
+      // Calculate new offset to zoom around touch center
+      const fixedX = (this.touchStart.svgX - this.touchStart.ox) / this.touchStart.zoom;
+      const fixedY = (this.touchStart.svgY - this.touchStart.oy) / this.touchStart.zoom;
+      
+      // Update zoom and position
+      this.zoom = newZoom;
+      
+      // Adjust for center movement
+      const centerDx = currentCenter.x - this.lastTouchCenter.x;
+      const centerDy = currentCenter.y - this.lastTouchCenter.y;
+      
+      const svgCenter = this.screenToSvg(currentCenter.x, currentCenter.y);
+      this.offsetX = svgCenter.x - fixedX * this.zoom + centerDx;
+      this.offsetY = svgCenter.y - fixedY * this.zoom + centerDy;
+      
+      this.updateTransform();
+    }
+  }
+
+  /**
+   * Handle touch end
+   */
+  handleTouchEnd(e) {
+    if (!this.isTouching) return;
+    
+    // Check if touch is on a node - if so, don't interfere
+    const target = e.target;
+    const nodeElement = target.closest('.mindmap-node');
+    if (nodeElement) {
+      return; // Let node handle the touch
+    }
+    
+    e.preventDefault();
+    
+    const touches = e.touches;
+    
+    if (touches.length === 0) {
+      // All touches ended
+      this.isTouching = false;
+      this.isDragging = false;
+      this.touchStart = null;
+      this.lastTouchDistance = null;
+      this.lastTouchCenter = null;
+    } else if (touches.length === 1 && this.lastTouchDistance) {
+      // Went from two touches to one - restart single touch
+      this.lastTouchDistance = null;
+      this.lastTouchCenter = null;
+      this.isDragging = true;
+      this.touchStart = {
+        x: touches[0].clientX,
+        y: touches[0].clientY,
+        ox: this.offsetX,
+        oy: this.offsetY
+      };
+    }
   }
 
   /**
@@ -345,16 +534,16 @@ class MindMap {
    */
   addChild(parentId, name) {
     if (!this.config.editable) return false;
-    
+
     const parent = this.findNodeById(this.treeData, parentId);
     if (!parent) return false;
-    
+
     if (!parent.children) parent.children = [];
     parent.children.push({
       id: this.generateId(),
       name: name || 'New Node'
     });
-    
+
     this.render();
     this.setStatus(`Added child "${name || 'New Node'}" to "${parent.name}"`);
     return true;
@@ -365,18 +554,18 @@ class MindMap {
    */
   addSibling(nodeId, name) {
     if (!this.config.editable) return false;
-    
+
     const parent = this.findParentById(this.treeData, nodeId);
     if (!parent) return false;
-    
+
     const newNode = {
       id: this.generateId(),
       name: name || 'New Node'
     };
-    
+
     const siblingIndex = parent.children.findIndex(c => c.id === nodeId);
     parent.children.splice(siblingIndex + 1, 0, newNode);
-    
+
     this.render();
     this.setStatus(`Added sibling "${name || 'New Node'}"`);
     return true;
@@ -387,19 +576,19 @@ class MindMap {
    */
   deleteNode(nodeId) {
     if (!this.config.editable) return false;
-    
+
     if (nodeId === this.treeData.id) {
       this.setStatus('Cannot delete root node');
       return false;
     }
-    
+
     const parent = this.findParentById(this.treeData, nodeId);
     if (!parent) return false;
-    
+
     const nodeIndex = parent.children.findIndex(c => c.id === nodeId);
     const nodeName = parent.children[nodeIndex].name;
     parent.children.splice(nodeIndex, 1);
-    
+
     this.render();
     this.setStatus(`Deleted "${nodeName}"`);
     return true;
@@ -410,13 +599,13 @@ class MindMap {
    */
   renameNode(nodeId, newName) {
     if (!this.config.editable) return false;
-    
+
     const node = this.findNodeById(this.treeData, nodeId);
     if (!node) return false;
-    
+
     const oldName = node.name;
     node.name = newName || 'Unnamed';
-    
+
     this.render();
     this.setStatus(`Renamed "${oldName}" to "${node.name}"`);
     return true;
@@ -427,24 +616,24 @@ class MindMap {
    */
   showContextMenu(x, y, nodeId) {
     if (!this.config.editable) return;
-    
+
     this.hideContextMenu();
-    
+
     const node = this.findNodeById(this.treeData, nodeId);
     const isRoot = nodeId === this.treeData.id;
-    
+
     this.contextMenu = document.createElement('div');
     this.contextMenu.className = 'mindmap-context-menu';
     this.contextMenu.style.left = x + 'px';
     this.contextMenu.style.top = y + 'px';
-    
+
     const items = [
       { text: `Rename "${node.name}"`, action: () => this.startEdit(nodeId) },
       { text: 'Add Child', action: () => this.addChild(nodeId, prompt('Child name:')) },
       !isRoot && { text: 'Add Sibling', action: () => this.addSibling(nodeId, prompt('Sibling name:')) },
       !isRoot && { text: `Delete "${node.name}"`, action: () => this.deleteNode(nodeId), dangerous: true }
     ].filter(Boolean);
-    
+
     items.forEach(item => {
       const div = document.createElement('div');
       div.className = `mindmap-context-menu-item ${item.dangerous ? 'dangerous' : ''}`;
@@ -455,9 +644,9 @@ class MindMap {
       });
       this.contextMenu.appendChild(div);
     });
-    
+
     document.body.appendChild(this.contextMenu);
-    
+
     // Position adjustment if menu goes off screen
     const rect = this.contextMenu.getBoundingClientRect();
     if (rect.right > window.innerWidth) {
@@ -483,28 +672,28 @@ class MindMap {
    */
   startEdit(nodeId) {
     if (!this.config.editable || this.isEditing) return;
-    
+
     const node = this.findNodeById(this.treeData, nodeId);
     if (!node) return;
-    
+
     this.isEditing = true;
     this.editingNode = nodeId;
     this.svg.setAttribute('class', this.svg.getAttribute('class') + ' editing');
-    
+
     // Find the node element and its position
     const nodeElement = document.querySelector(`[data-node-id="${nodeId}"]`);
     if (!nodeElement) return;
-    
+
     // Add editing class for visual feedback
     const currentClass = nodeElement.getAttribute('class') || '';
     if (!currentClass.includes('editing')) {
       nodeElement.setAttribute('class', currentClass + ' editing');
     }
-    
+
     // Get text element position
     const textElement = nodeElement.querySelector('text');
     const rect = textElement.getBoundingClientRect();
-    
+
     // Create input
     const input = document.createElement('input');
     input.className = 'mindmap-edit-input';
@@ -512,27 +701,27 @@ class MindMap {
     input.style.left = (rect.left - 50) + 'px';
     input.style.top = (rect.top - 15) + 'px';
     input.style.width = '100px';
-    
+
     document.body.appendChild(input);
     input.select();
     input.focus();
-    
+
     const finishEdit = (save = true) => {
       if (!this.isEditing) return;
-      
+
       if (save && input.value.trim()) {
         this.renameNode(nodeId, input.value.trim());
       } else {
         this.render(); // Re-render to remove editing class
       }
-      
+
       input.remove();
       this.isEditing = false;
       this.editingNode = null;
       const svgClass = this.svg.getAttribute('class') || '';
       this.svg.setAttribute('class', svgClass.replace(' editing', '').replace('editing', ''));
     };
-    
+
     input.addEventListener('blur', () => finishEdit(true));
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter') finishEdit(true);
@@ -564,14 +753,14 @@ class MindMap {
     const r = depth * this.config.radiusStep;
     const centerX = this.config.width / 2;
     const centerY = this.config.height / 2;
-    
+
     node._x = centerX + r * Math.cos(mid);
     node._y = centerY + r * Math.sin(mid);
     node._angle = mid;
     node._depth = depth;
-    
+
     if (!node.children || node.children.length === 0) return;
-    
+
     let angle = startAngle;
     for (const c of node.children) {
       const span = (endAngle - startAngle) * (c._leafCount / node._leafCount);
@@ -585,19 +774,19 @@ class MindMap {
    */
   layoutRoot(root) {
     const gap = 0.0001;
-    const start = -Math.PI/2 + gap;
-    const end = -Math.PI/2 + Math.PI*2 - gap;
+    const start = -Math.PI / 2 + gap;
+    const end = -Math.PI / 2 + Math.PI * 2 - gap;
     const centerX = this.config.width / 2;
     const centerY = this.config.height / 2;
-    
+
     root._x = centerX;
     root._y = centerY;
     root._angle = 0;
     root._depth = 0;
     root._isRoot = true;
-    
+
     if (!root.children) return;
-    
+
     let angle = start;
     for (const c of root.children) {
       const span = (end - start) * (c._leafCount / root._leafCount);
@@ -615,8 +804,8 @@ class MindMap {
       this.viewport.removeChild(this.viewport.firstChild);
     }
 
-    const gLinks = document.createElementNS('http://www.w3.org/2000/svg','g');
-    const gNodes = document.createElementNS('http://www.w3.org/2000/svg','g');
+    const gLinks = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const gNodes = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     this.viewport.appendChild(gLinks);
     this.viewport.appendChild(gNodes);
 
@@ -624,7 +813,7 @@ class MindMap {
     const drawLinks = (node) => {
       if (!node.children) return;
       for (const c of node.children) {
-        const line = document.createElementNS('http://www.w3.org/2000/svg','path');
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         const px = node._x, py = node._y;
         const cx1 = px + (this.config.radiusStep * 0.4) * Math.cos(node._angle);
         const cy1 = py + (this.config.radiusStep * 0.4) * Math.sin(node._angle);
@@ -640,10 +829,10 @@ class MindMap {
 
     // Draw nodes
     const drawNodes = (node) => {
-      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       let nodeClasses = 'mindmap-node';
       g.setAttribute('data-node-id', node.id);
-      
+
       // Add specific classes for styling
       if (node._isRoot) {
         nodeClasses += ' root';
@@ -652,16 +841,16 @@ class MindMap {
       } else {
         nodeClasses += ' branch';
       }
-      
+
       // Add editing class if this node is being edited
       if (this.editingNode === node.id) {
         nodeClasses += ' editing';
       }
-      
+
       g.setAttribute('class', nodeClasses);
       g.setAttribute('transform', `translate(${node._x},${node._y})`);
-      
-      const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       let r;
       if (node._isRoot) {
         r = 12;
@@ -672,10 +861,10 @@ class MindMap {
       }
       circle.setAttribute('r', r);
       g.appendChild(circle);
-      
-      const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       text.textContent = node.name || '';
-      
+
       if (node._depth > 0) {
         const textOffset = r + (node._isLeaf ? 20 : 18);
         const dx = Math.cos(node._angle) * textOffset;
@@ -684,28 +873,116 @@ class MindMap {
         text.setAttribute('y', dy);
         const angleDeg = (node._angle * 180 / Math.PI + 360) % 360;
         if (angleDeg > 90 && angleDeg < 270) {
-          text.setAttribute('text-anchor','end');
+          text.setAttribute('text-anchor', 'end');
         }
       }
-      
+
       g.appendChild(text);
-      
+
       // Event handlers
       if (this.config.editable) {
+        // Mouse events
         g.addEventListener('contextmenu', e => {
           e.preventDefault();
           this.showContextMenu(e.clientX, e.clientY, node.id);
         });
-        
+
         g.addEventListener('dblclick', e => {
           e.preventDefault();
           this.startEdit(node.id);
         });
+
+        // Touch events for editing
+        let touchStartTime = 0;
+        let touchStartPos = null;
+        let tapCount = 0;
+        let tapTimeout = null;
+        let longPressTimeout = null;
+
+        g.addEventListener('touchstart', e => {
+          e.stopPropagation(); // Prevent SVG pan/zoom
+          touchStartTime = Date.now();
+          touchStartPos = {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY
+          };
+
+          // Start long press timer with visual feedback
+          longPressTimeout = setTimeout(() => {
+            g.classList.add('long-pressing');
+          }, 300); // Visual feedback after 300ms
+        });
+
+        g.addEventListener('touchmove', e => {
+          // Cancel long press if finger moves too much
+          if (touchStartPos) {
+            const currentPos = {
+              x: e.touches[0].clientX,
+              y: e.touches[0].clientY
+            };
+            const distance = Math.sqrt(
+              Math.pow(currentPos.x - touchStartPos.x, 2) +
+              Math.pow(currentPos.y - touchStartPos.y, 2)
+            );
+            
+            if (distance > 15) { // 15px tolerance
+              clearTimeout(longPressTimeout);
+              g.classList.remove('long-pressing');
+            }
+          }
+        });
+
+        g.addEventListener('touchend', e => {
+          e.stopPropagation(); // Prevent SVG pan/zoom
+          e.preventDefault();
+
+          // Clear timeouts and visual feedback
+          clearTimeout(longPressTimeout);
+          g.classList.remove('long-pressing');
+
+          const touchEndTime = Date.now();
+          const touchDuration = touchEndTime - touchStartTime;
+          const touchEndPos = {
+            x: e.changedTouches[0].clientX,
+            y: e.changedTouches[0].clientY
+          };
+
+          // Calculate distance moved
+          const distance = Math.sqrt(
+            Math.pow(touchEndPos.x - touchStartPos.x, 2) +
+            Math.pow(touchEndPos.y - touchStartPos.y, 2)
+          );
+
+          // Long press for context menu (600ms+, minimal movement)
+          if (touchDuration >= 600 && distance < 15) {
+            this.showContextMenu(touchEndPos.x, touchEndPos.y, node.id);
+            return;
+          }
+
+          // Quick tap for double-tap detection
+          if (touchDuration < 400 && distance < 15) {
+            tapCount++;
+            
+            if (tapCount === 1) {
+              // Start timer for double tap
+              tapTimeout = setTimeout(() => {
+                tapCount = 0;
+                // Single tap - just provide feedback
+                this.setStatus(`Tapped "${node.name}" - Double tap to edit, long press for menu`);
+              }, 400);
+            } else if (tapCount === 2) {
+              // Double tap - start editing
+              clearTimeout(tapTimeout);
+              tapCount = 0;
+              this.startEdit(node.id);
+            }
+          }
+        });
       }
-      
+
       g.style.cursor = 'pointer';
       gNodes.appendChild(g);
-      
+
       if (node.children) {
         for (const c of node.children) drawNodes(c);
       }
@@ -720,7 +997,7 @@ class MindMap {
    */
   render() {
     if (!this.treeData) return;
-    
+
     this.countLeaves(this.treeData);
     this.layoutRoot(this.treeData);
     this.draw(this.treeData);
@@ -732,7 +1009,7 @@ class MindMap {
    */
   exportData() {
     const dataStr = JSON.stringify(this.treeData, null, 2);
-    const blob = new Blob([dataStr], {type: 'application/json'});
+    const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

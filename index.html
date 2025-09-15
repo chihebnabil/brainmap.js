@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,12 +12,12 @@
             padding: 0;
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         }
-        
+
         #mindmap-container {
             width: 100vw;
             height: 100vh;
         }
-        
+
         .demo-controls {
             position: absolute;
             top: 20px;
@@ -30,13 +31,13 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        
+
         .demo-controls h3 {
             margin: 0 0 10px 0;
             font-size: 14px;
             color: #374151;
         }
-        
+
         .demo-btn {
             padding: 8px 12px;
             border: 1px solid #d1d5db;
@@ -46,18 +47,18 @@
             font-size: 12px;
             transition: all 0.2s ease;
         }
-        
+
         .demo-btn:hover {
             background: #f3f4f6;
             transform: translateY(-1px);
         }
-        
+
         .theme-selector {
             display: flex;
             flex-direction: column;
             gap: 5px;
         }
-        
+
         .theme-selector select {
             padding: 5px;
             border: 1px solid #d1d5db;
@@ -66,12 +67,13 @@
         }
     </style>
 </head>
+
 <body>
     <div id="mindmap-container"></div>
-    
+
     <div class="demo-controls">
         <h3>🧠 MindMap.js Demo</h3>
-        
+
         <div class="theme-selector">
             <label for="theme-select">Theme:</label>
             <select id="theme-select">
@@ -82,7 +84,7 @@
                 <option value="vibrant">Vibrant</option>
             </select>
         </div>
-        
+
         <button class="demo-btn" onclick="loadSampleData()">📊 Load Sample Data</button>
         <button class="demo-btn" onclick="loadProjectData()">💼 Load Project Data</button>
         <button class="demo-btn" onclick="loadLearningData()">📚 Load Learning Data</button>
@@ -108,7 +110,7 @@
                     { id: 'idea3', name: 'Idea 3', children: [{ id: 'detail2', name: 'Detail B' }, { id: 'detail3', name: 'Detail C' }] }
                 ]
             },
-            
+
             project: {
                 id: 'project-root',
                 name: 'Web App Project',
@@ -143,7 +145,7 @@
                     { id: 'testing', name: 'Testing' }
                 ]
             },
-            
+
             learning: {
                 id: 'learning-root',
                 name: 'JavaScript Learning Path',
@@ -200,7 +202,7 @@
                 showStatus: true,
                 theme: 'default'
             });
-            
+
             // Set initial data
             mindmap.setData(sampleDatasets.simple);
         }
@@ -230,21 +232,21 @@
                 alert('Enable editing mode first!');
                 return;
             }
-            
+
             const randomNames = [
-                'New Idea', 'Innovation', 'Strategy', 'Goal', 'Task', 
+                'New Idea', 'Innovation', 'Strategy', 'Goal', 'Task',
                 'Research', 'Development', 'Analysis', 'Planning', 'Review'
             ];
             const randomName = randomNames[Math.floor(Math.random() * randomNames.length)];
-            
+
             const rootId = mindmap.getData().id;
             mindmap.addChild(rootId, randomName);
         }
 
         // Theme change handler
-        document.getElementById('theme-select').addEventListener('change', function(e) {
+        document.getElementById('theme-select').addEventListener('change', function (e) {
             const selectedTheme = e.target.value;
-            
+
             if (MindMapThemes[selectedTheme]) {
                 mindmap.updateConfig(MindMapThemes[selectedTheme]);
             } else {
@@ -253,13 +255,13 @@
         });
 
         // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             initMindMap();
-            
+
             // Demo automatic theme switching every 10 seconds (remove this for production)
             let themeIndex = 0;
             const themes = Object.keys(MindMapThemes);
-            
+
             /* Uncomment to enable automatic theme cycling
             setInterval(() => {
                 themeIndex = (themeIndex + 1) % themes.length;
@@ -273,14 +275,14 @@
         // Demonstrate programmatic API usage
         function demonstrateAPI() {
             console.log('=== MindMap.js API Demo ===');
-            
+
             // Get current data
             console.log('Current data:', mindmap.getData());
-            
+
             // Add nodes programmatically
             const rootId = mindmap.getData().id;
             mindmap.addChild(rootId, 'API Added Node');
-            
+
             // You can also listen for data changes
             mindmap.updateConfig({
                 onDataChange: (newData) => {
@@ -297,4 +299,5 @@
         window.mindmap = mindmap; // Make mindmap available in console for debugging
     </script>
 </body>
+
 </html>

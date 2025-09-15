@@ -48,6 +48,14 @@
   height: 100%;
   background: var(--mindmap-bg-primary);
   overflow: hidden;
+  /* Touch improvements */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: none;
 }
 
 .mindmap-svg {
@@ -93,9 +101,24 @@
   animation: mindmap-dash 1s linear infinite;
 }
 
+.mindmap-node.long-pressing circle {
+  stroke-width: 4;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8));
+  animation: mindmap-pulse 0.5s ease-in-out;
+}
+
 @keyframes mindmap-dash {
   to {
     stroke-dashoffset: -10;
+  }
+}
+
+@keyframes mindmap-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
   }
 }
 
@@ -124,6 +147,45 @@
   font-size: var(--mindmap-font-size-leaf);
   fill: var(--mindmap-color-leaf-text);
   font-weight: var(--mindmap-font-weight-bold);
+}
+
+/* Touch enhancements */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets on mobile */
+  .mindmap-node circle {
+    r: 15; /* Larger radius for easier touching */
+  }
+  
+  .mindmap-node.root circle {
+    r: 18;
+  }
+  
+  .mindmap-node.branch circle {
+    r: 12;
+  }
+  
+  .mindmap-node.leaf circle {
+    r: 14;
+  }
+  
+  /* Remove hover effects on touch devices */
+  .mindmap-node:hover circle {
+    transform: none;
+    filter: drop-shadow(var(--mindmap-shadow-default));
+  }
+  
+  /* Larger control buttons for touch */
+  .mindmap-control-btn {
+    padding: 12px 16px;
+    font-size: 14px;
+    min-height: 44px; /* iOS recommended touch target size */
+    min-width: 44px;
+  }
+}
+
+/* Disable selection on all mindmap elements */
+.mindmap-container * {
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mindmap-link {

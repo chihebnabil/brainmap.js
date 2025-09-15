@@ -6,14 +6,15 @@ A beautiful, interactive, and themeable mindmap library for creating hierarchica
 
 ## ✨ Features
 
-- **Beautiful Themes**: Multiple built-in themes (default, dark, compact, professional, vibrant)
-- **Interactive Editing**: Right-click context menus, double-click to rename, drag to pan, scroll to zoom
-- **Fully Customizable**: Colors, sizes, fonts, and behaviors can be configured
-- **Responsive**: Works on desktop and mobile devices
-- **Zero Dependencies**: Pure vanilla JavaScript, no external libraries required
-- **Easy Integration**: Simple API, just include CSS and JS files
-- **Data Export**: Export mindmap data as JSON
-- **Dynamic Updates**: Add, remove, and modify nodes programmatically
+- **🎨 Beautiful Themes**: Multiple built-in themes (default, dark, compact, professional, vibrant)
+- **✏️ Interactive Editing**: Right-click context menus, double-click to rename, drag to pan, scroll to zoom
+- **📱 Touch Support**: Full mobile support with pinch-to-zoom, touch pan, and optimized touch targets
+- **🎯 Fully Customizable**: Colors, sizes, fonts, and behaviors can be configured
+- **📱 Responsive**: Works on desktop and mobile devices
+- **🚫 Zero Dependencies**: Pure vanilla JavaScript, no external libraries required
+- **📦 Easy Integration**: Simple API, just include CSS and JS files
+- **💾 Data Export**: Export mindmap data as JSON
+- **🔄 Dynamic Updates**: Add, remove, and modify nodes programmatically
 
 ## 🚀 Quick Start
 
@@ -208,12 +209,21 @@ mindmap.updateConfig(customTheme);
 
 ## 🖱️ User Interactions
 
+### Desktop
 - **Scroll**: Zoom in/out
 - **Drag**: Pan around the mindmap
 - **Right-click**: Open context menu (add child/sibling, rename, delete)
 - **Double-click**: Start inline editing of node name
 - **Export button**: Download mindmap data as JSON
 - **Reset button**: Reset view to center
+
+### Mobile & Touch Devices
+- **Pinch**: Zoom in/out with two fingers
+- **Single finger drag**: Pan around the mindmap
+- **Tap**: Select node
+- **Long press**: Open context menu (add child/sibling, rename, delete)
+- **Double tap**: Start inline editing of node name
+- **Touch-optimized**: Larger touch targets and improved responsiveness
 
 ## 📊 Data Format
 
@@ -293,6 +303,45 @@ const mindmap = new MindMap('#styled-mindmap', {
     branch: { fill: '#8b5cf6', stroke: '#7c3aed', text: '#ffffff' },
     leaf: { fill: '#06b6d4', stroke: '#0891b2', text: '#ffffff' },
     link: 'rgba(139, 92, 246, 0.3)'
+  }
+});
+```
+
+### Mobile-Optimized Setup
+
+```javascript
+// Mobile-friendly configuration
+const mindmap = new MindMap('#mobile-mindmap', {
+  width: window.innerWidth,
+  height: window.innerHeight,
+  theme: 'compact',
+  radiusStep: 100, // Tighter spacing for mobile
+  editable: true,
+  showControls: true
+});
+
+// Handle orientation changes
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => {
+    mindmap.updateConfig({
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+    mindmap.resetView();
+  }, 100);
+});
+```
+
+### Touch Event Handling
+
+```javascript
+// Optional: Listen for touch-specific events
+mindmap.updateConfig({
+  onTouchStart: (e) => {
+    console.log('Touch started:', e.touches.length, 'fingers');
+  },
+  onPinchZoom: (scale) => {
+    console.log('Pinch zoom scale:', scale);
   }
 });
 ```
