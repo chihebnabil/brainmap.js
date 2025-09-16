@@ -4,10 +4,10 @@ A beautiful, interactive, and themeable mindmap library for creating hierarchica
 
 ![Brinmap.js Demo](demo-screenshot.png)
 
-## ✨ Features
+## Features
 
-- **🎨 Beautiful Themes**: Multiple built-in themes (default, dark, compact, professional, vibrant)
-- **✏️ Interactive Editing**: Right-click context menus, double-click to rename, drag to pan, scroll to zoom
+- **Beautiful Themes**: Multiple built-in themes (default, dark, compact, professional, vibrant)
+- **Interactive Editing**: Right-click context menus, double-click to rename, drag to pan, scroll to zoom
 - **📱 Touch Support**: Full mobile support with pinch-to-zoom, touch pan, and optimized touch targets
 - **Fully Customizable**: Colors, sizes, fonts, and behaviors can be configured
 - **Responsive**: Works on desktop and mobile devices
@@ -16,7 +16,7 @@ A beautiful, interactive, and themeable mindmap library for creating hierarchica
 - **Data Export**: Export mindmap data as JSON
 - **Dynamic Updates**: Add, remove, and modify nodes programmatically
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Include the Files
 
@@ -67,7 +67,7 @@ A beautiful, interactive, and themeable mindmap library for creating hierarchica
 npm install brainmap.js
 ```
 
-## 📖 API Reference
+## API Reference
 
 ### Constructor
 
@@ -166,7 +166,7 @@ const node = mindmap.findNodeById(mindmap.getData(), 'node-id');
 const parent = mindmap.findParentById(mindmap.getData(), 'child-id');
 ```
 
-## 🎨 Themes
+## Themes
 
 ### Built-in Themes
 
@@ -225,7 +225,7 @@ mindmap.updateConfig(customTheme);
 - **Double tap**: Start inline editing of node name
 - **Touch-optimized**: Larger touch targets and improved responsiveness
 
-## 📊 Data Format
+## Data Format
 
 The mindmap uses a simple hierarchical JSON structure:
 
@@ -246,7 +246,7 @@ The mindmap uses a simple hierarchical JSON structure:
 }
 ```
 
-## 🎯 Examples
+## Examples
 
 ### Basic Usage
 
@@ -346,7 +346,7 @@ mindmap.updateConfig({
 });
 ```
 
-## 🛠️ Development
+## Development
 
 ### File Structure
 
@@ -374,15 +374,15 @@ brainmap-js-library/
 - Safari 12+
 - Edge 79+
 
-## 📄 License
+## License
 
 MIT License - feel free to use in personal and commercial projects.
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit issues and pull requests.
 
-## 📧 Support
+## Support
 
 For questions and support, please open an issue on GitHub.
 

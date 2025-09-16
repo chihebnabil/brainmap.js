@@ -76,7 +76,7 @@
 
         <div class="theme-selector">
             <label for="theme-select">Theme:</label>
-            <select id=a"theme-select">
+            <select id="theme-select">
                 <option value="default">Default</option>
                 <option value="dark">Dark</option>
                 <option value="compact">Compact</option>
@@ -210,25 +210,45 @@
 
         // Load different sample datasets
         function loadSampleData() {
+            if (!mindmap) {
+                console.warn('MindMap not initialized yet. Please wait...');
+                return;
+            }
             mindmap.setData(sampleDatasets.simple);
         }
 
         function loadProjectData() {
+            if (!mindmap) {
+                console.warn('MindMap not initialized yet. Please wait...');
+                return;
+            }
             mindmap.setData(sampleDatasets.project);
         }
 
         function loadLearningData() {
+            if (!mindmap) {
+                console.warn('MindMap not initialized yet. Please wait...');
+                return;
+            }
             mindmap.setData(sampleDatasets.learning);
         }
 
         // Toggle editing mode
         function toggleEditing() {
+            if (!mindmap) {
+                console.warn('MindMap not initialized yet. Please wait...');
+                return;
+            }
             isEditable = !isEditable;
             mindmap.updateConfig({ editable: isEditable });
         }
 
         // Add a random node to the root
         function addRandomNode() {
+            if (!mindmap) {
+                console.warn('MindMap not initialized yet. Please wait...');
+                return;
+            }
             if (!isEditable) {
                 alert('Enable editing mode first!');
                 return;
@@ -244,20 +264,24 @@
             mindmap.addChild(rootId, randomName);
         }
 
-        // Theme change handler
-        document.getElementById('theme-select').addEventListener('change', function (e) {
-            const selectedTheme = e.target.value;
-
-            if (MindMapThemes[selectedTheme]) {
-                mindmap.updateConfig(MindMapThemes[selectedTheme]);
-            } else {
-                mindmap.updateConfig({ theme: selectedTheme });
-            }
-        });
-
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function () {
             initMindMap();
+
+            // Theme change handler
+            document.getElementById('theme-select').addEventListener('change', function (e) {
+                if (!mindmap) {
+                    console.warn('MindMap not initialized yet. Please wait...');
+                    return;
+                }
+                const selectedTheme = e.target.value;
+
+                if (MindMapThemes[selectedTheme]) {
+                    mindmap.updateConfig(MindMapThemes[selectedTheme]);
+                } else {
+                    mindmap.updateConfig({ theme: selectedTheme });
+                }
+            });
 
             // Demo automatic theme switching every 10 seconds (remove this for production)
             let themeIndex = 0;
@@ -275,6 +299,10 @@
 
         // Test custom colors
         function testCustomColors() {
+            if (!document.getElementById('mindmap-container')) {
+                console.warn('MindMap container not found. Please wait...');
+                return;
+            }
             // Create a new mindmap with custom colors
             mindmap = new MindMap(document.getElementById('mindmap-container'), {
                 theme: 'default',
