@@ -57,8 +57,8 @@ A beautiful, interactive, and themeable mindmap library for creating hierarchica
 ### 2. Via CDN
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/brainmap.js/brainmap.css">
-<script src="https://cdn.jsdelivr.net/npm/brainmap.js/brainmap.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/brainmap.js/brainmap.css">
+<script src="https://unpkg.com/brainmap.js/brainmap.js"></script>
 ```
 
 ### 3. Via NPM
