@@ -164,26 +164,26 @@ class MindMap {
    */
   applyCustomColors() {
     const root = this.container;
-    
+
     // Apply custom colors to CSS variables
     if (this.config.colors.root) {
       if (this.config.colors.root.fill) root.style.setProperty('--mindmap-color-root-fill', this.config.colors.root.fill);
       if (this.config.colors.root.stroke) root.style.setProperty('--mindmap-color-root-stroke', this.config.colors.root.stroke);
       if (this.config.colors.root.text) root.style.setProperty('--mindmap-color-root-text', this.config.colors.root.text);
     }
-    
+
     if (this.config.colors.branch) {
       if (this.config.colors.branch.fill) root.style.setProperty('--mindmap-color-branch-fill', this.config.colors.branch.fill);
       if (this.config.colors.branch.stroke) root.style.setProperty('--mindmap-color-branch-stroke', this.config.colors.branch.stroke);
       if (this.config.colors.branch.text) root.style.setProperty('--mindmap-color-branch-text', this.config.colors.branch.text);
     }
-    
+
     if (this.config.colors.leaf) {
       if (this.config.colors.leaf.fill) root.style.setProperty('--mindmap-color-leaf-fill', this.config.colors.leaf.fill);
       if (this.config.colors.leaf.stroke) root.style.setProperty('--mindmap-color-leaf-stroke', this.config.colors.leaf.stroke);
       if (this.config.colors.leaf.text) root.style.setProperty('--mindmap-color-leaf-text', this.config.colors.leaf.text);
     }
-    
+
     if (this.config.colors.link) {
       root.style.setProperty('--mindmap-color-link', this.config.colors.link);
     }

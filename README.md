@@ -67,6 +67,46 @@ A beautiful, interactive, and themeable mindmap library for creating hierarchica
 npm install brainmap.js
 ```
 
+### 4. TypeScript Support
+
+Brainmap.js includes full TypeScript definitions out of the box:
+
+```typescript
+import MindMap, { MindMapNode, MindMapConfig } from 'brainmap.js';
+
+// Define your data with proper typing
+const data: MindMapNode = {
+  id: 'root',
+  name: 'My Project',
+  children: [
+    { id: 'frontend', name: 'Frontend' },
+    { id: 'backend', name: 'Backend' }
+  ]
+};
+
+// Configure with type safety
+const config: MindMapConfig = {
+  width: 800,
+  height: 600,
+  theme: 'dark',
+  editable: true,
+  colors: {
+    root: { fill: '#2563eb', text: '#ffffff' }
+  }
+};
+
+// Create typed mindmap instance
+const mindmap = new MindMap('#container', config);
+mindmap.setData(data);
+```
+
+**Available Types:**
+- `MindMapNode` - Node data structure
+- `MindMapConfig` - Configuration options
+- `NodeColors` - Color configuration for nodes
+- `ColorScheme` - Complete color scheme
+- `ContextMenuItem` - Context menu item definition
+
 ## API Reference
 
 ### Constructor
