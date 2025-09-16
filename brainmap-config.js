@@ -79,20 +79,20 @@ const MindMapThemes = {
   default: {
     theme: 'default',
     colors: {
-      root: { fill: '#f97316', stroke: '#dc2626', text: '#ffffff' },
-      branch: { fill: '#34d399', stroke: '#059669', text: '#065f46' },
-      leaf: { fill: '#60a5fa', stroke: '#2563eb', text: '#1e40af' },
-      link: 'rgba(255,255,255,0.6)'
+      root: { fill: '#f97316', stroke: '#b45309', text: '#ffffff' }, // Orange with good white contrast
+      branch: { fill: '#34d399', stroke: '#059669', text: '#064e3b' }, // Green, dark text
+      leaf: { fill: '#60a5fa', stroke: '#2563eb', text: '#0c1e48' }, // Blue, strong dark text
+      link: 'rgba(55,65,81,0.5)' // softer gray
     }
   },
 
   dark: {
     theme: 'dark',
     colors: {
-      root: { fill: '#ef4444', stroke: '#991b1b', text: '#ffffff' },
-      branch: { fill: '#10b981', stroke: '#047857', text: '#ffffff' },
-      leaf: { fill: '#3b82f6', stroke: '#1d4ed8', text: '#ffffff' },
-      link: 'rgba(156, 163, 175, 0.6)'
+      root: { fill: '#dc2626', stroke: '#7f1d1d', text: '#ffffff' }, // Red with white contrast
+      branch: { fill: '#059669', stroke: '#065f46', text: '#ffffff' }, // Emerald
+      leaf: { fill: '#2563eb', stroke: '#1e40af', text: '#ffffff' }, // Blue
+      link: 'rgba(209,213,219,0.5)' // light gray for dark bg
     }
   },
 
@@ -102,33 +102,34 @@ const MindMapThemes = {
     nodeRadius: { root: 8, branch: 5, leaf: 6 },
     fontSize: { root: 12, branch: 10, leaf: 9 },
     colors: {
-      root: { fill: '#8b5cf6', stroke: '#7c3aed', text: '#ffffff' },
-      branch: { fill: '#06b6d4', stroke: '#0891b2', text: '#ffffff' },
-      leaf: { fill: '#84cc16', stroke: '#65a30d', text: '#365314' },
-      link: 'rgba(148, 163, 184, 0.5)'
+      root: { fill: '#8b5cf6', stroke: '#6d28d9', text: '#ffffff' }, // Purple
+      branch: { fill: '#06b6d4', stroke: '#0e7490', text: '#083344' }, // Cyan with dark text
+      leaf: { fill: '#84cc16', stroke: '#4d7c0f', text: '#1a2e05' }, // Lime with dark text
+      link: 'rgba(75,85,99,0.4)' // neutral gray
     }
   },
 
   professional: {
-    theme: 'default',
+    theme: 'professional',
     colors: {
-      root: { fill: '#1f2937', stroke: '#111827', text: '#ffffff' },
-      branch: { fill: '#374151', stroke: '#1f2937', text: '#ffffff' },
-      leaf: { fill: '#6b7280', stroke: '#374151', text: '#ffffff' },
-      link: 'rgba(107, 114, 128, 0.4)'
+      root: { fill: '#1f2937', stroke: '#111827', text: '#f9fafb' }, // Dark slate
+      branch: { fill: '#374151', stroke: '#1f2937', text: '#f9fafb' }, // Gray
+      leaf: { fill: '#6b7280', stroke: '#374151', text: '#f9fafb' }, // Muted gray
+      link: 'rgba(156,163,175,0.5)'
     }
   },
 
   vibrant: {
-    theme: 'default',
+    theme: 'vibrant',
     colors: {
-      root: { fill: '#ec4899', stroke: '#be185d', text: '#ffffff' },
-      branch: { fill: '#f59e0b', stroke: '#d97706', text: '#ffffff' },
-      leaf: { fill: '#10b981', stroke: '#059669', text: '#ffffff' },
-      link: 'rgba(251, 146, 60, 0.5)'
+      root: { fill: '#ec4899', stroke: '#be185d', text: '#ffffff' }, // Pink
+      branch: { fill: '#f59e0b', stroke: '#b45309', text: '#1c1917' }, // Amber with dark text
+      leaf: { fill: '#10b981', stroke: '#047857', text: '#064e3b' }, // Green with dark text
+      link: 'rgba(251,146,60,0.6)' // orange link
     }
   }
 };
+
 
 // Export for both CommonJS and ES modules
 if (typeof module !== 'undefined' && module.exports) {

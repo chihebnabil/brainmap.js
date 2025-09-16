@@ -8,7 +8,7 @@ A beautiful, interactive, and themeable mindmap library for creating hierarchica
 
 - **Beautiful Themes**: Multiple built-in themes (default, dark, compact, professional, vibrant)
 - **Interactive Editing**: Right-click context menus, double-click to rename, drag to pan, scroll to zoom
-- **📱 Touch Support**: Full mobile support with pinch-to-zoom, touch pan, and optimized touch targets
+- **Touch Support**: Full mobile support with pinch-to-zoom, touch pan, and optimized touch targets
 - **Fully Customizable**: Colors, sizes, fonts, and behaviors can be configured
 - **Responsive**: Works on desktop and mobile devices
 - **Zero Dependencies**: Pure vanilla JavaScript, no external libraries required
@@ -207,7 +207,7 @@ const customTheme = {
 mindmap.updateConfig(customTheme);
 ```
 
-## 🖱️ User Interactions
+## User Interactions
 
 ### Desktop
 - **Scroll**: Zoom in/out
